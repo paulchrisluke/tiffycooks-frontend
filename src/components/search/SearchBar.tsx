@@ -14,8 +14,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { WordPressCategory, WordPressTag } from '@/types/wordpress';
 
-interface SearchBarProps {
+export interface SearchBarProps {
+  categories: WordPressCategory[];
+  tags: WordPressTag[];
   className?: string;
 }
 

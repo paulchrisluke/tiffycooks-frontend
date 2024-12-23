@@ -8,8 +8,6 @@ import {
   WordPressComment,
   WordPressAuthor,
   WordPressMenu,
-  WordPressMenuItem,
-  WordPressSearchResult,
   WordPressMenuLocation,
   WordPressNavigation,
   WordPressNavigationItem
@@ -28,32 +26,28 @@ const REQUIRED_POST_FIELDS = [
   'slug',
   'excerpt',
   'date',
-  'content',
-  'yoast_head_json',
+  'featured_media',
+  'categories',
+  'tags',
+  'author',
   '_links',
   '_embedded',
-  'acf', // For recipe-specific fields
-];
-
-const REQUIRED_AUTHOR_FIELDS = [
-  'id',
-  'name',
-  'slug',
-  'avatar_urls',
+  'acf.cooking_time',
+  'acf.difficulty'
 ];
 
 const REQUIRED_CATEGORY_FIELDS = [
   'id',
   'name',
   'slug',
-  'count',
+  'count'
 ];
 
 const REQUIRED_TAG_FIELDS = [
   'id',
   'name',
   'slug',
-  'count',
+  'count'
 ];
 
 export class WordPressService {
@@ -125,7 +119,14 @@ export class WordPressService {
   }
 
   // Recipe-specific methods
-  static async getRecipeDetails(postId: number): Promise<any> {
+  static async getRecipeDetails(postId: number): Promise<{
+    recipe_details?: unknown;
+    cooking_time?: string;
+    difficulty?: string;
+    servings?: string;
+    ingredients?: string[];
+    instructions?: string[];
+  }> {
     return this.fetchAPI(`${config.wordpressApi.endpoints.posts}/${postId}`, {
       _fields: 'acf.recipe_details,acf.cooking_time,acf.difficulty,acf.servings,acf.ingredients,acf.instructions',
     });
@@ -416,7 +417,7 @@ export class WordPressService {
   }
 
   // Custom Post Types (if your WordPress site uses them)
-  static async getCustomPosts(postType: string, page = 1, perPage = config.pagination.defaultPageSize): Promise<any[]> {
+  static async getCustomPosts(postType: string, page = 1, perPage = config.pagination.defaultPageSize): Promise<WordPressPost[]> {
     return this.fetchAPI(`/${postType}`, {
       page: page.toString(),
       per_page: Math.min(perPage, config.pagination.maxPageSize).toString(),

@@ -7,7 +7,7 @@ import SearchBar from '@/components/search/SearchBar';
 export const revalidate = 0; // Don't cache search results
 
 interface SearchPageProps {
-  searchParams: {
+  searchParams?: {
     q?: string;
     category?: string;
     tag?: string;
@@ -17,7 +17,7 @@ interface SearchPageProps {
   };
 }
 
-async function SearchPage({ searchParams }: SearchPageProps) {
+export default async function SearchPage({ searchParams = {} }: SearchPageProps) {
   try {
     // Fetch categories and tags for filters
     const [categories, tags] = await Promise.all([
@@ -25,13 +25,14 @@ async function SearchPage({ searchParams }: SearchPageProps) {
       WordPressService.getTags(),
     ]);
 
-    // Parse search parameters
-    const page = Number(searchParams.page) || 1;
-    const searchQuery = searchParams.q?.trim();
-    const categoryIds = searchParams.category ? [Number(searchParams.category)] : undefined;
-    const tagIds = searchParams.tag ? [Number(searchParams.tag)] : undefined;
-    const cookingTime = searchParams.time;
-    const difficulty = searchParams.difficulty;
+    // Parse search parameters safely using Promise.resolve to handle async searchParams
+    const params = await Promise.resolve(searchParams);
+    const page = Number(params.page) || 1;
+    const searchQuery = params.q?.trim() || '';
+    const categoryIds = params.category ? [Number(params.category)] : undefined;
+    const tagIds = params.tag ? [Number(params.tag)] : undefined;
+    const cookingTime = params.time;
+    const difficulty = params.difficulty;
 
     // Fetch posts with filters
     const posts = await WordPressService.searchWithFilters({
@@ -89,7 +90,7 @@ async function SearchPage({ searchParams }: SearchPageProps) {
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-2">No recipes found</h2>
             <p className="text-muted-foreground">
-              Try adjusting your search or filters to find what you're looking for.
+              Try adjusting your search or filters to find what you&apos;re looking for.
             </p>
           </div>
         )}
@@ -99,6 +100,4 @@ async function SearchPage({ searchParams }: SearchPageProps) {
     console.error('Search error:', error);
     notFound();
   }
-}
-
-export default SearchPage; 
+} 
